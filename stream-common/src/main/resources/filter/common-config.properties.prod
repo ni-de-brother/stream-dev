@@ -1,3 +1,5 @@
+#env
+env=prod
 #Mysql
 mysql.host=cdh03
 mysql.port=3306

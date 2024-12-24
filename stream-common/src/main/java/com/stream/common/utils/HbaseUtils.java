@@ -63,7 +63,7 @@ public class HbaseUtils {
             put.addColumn(Bytes.toBytes("info"), Bytes.toBytes(entry.getKey()), Bytes.toBytes(String.valueOf(entry.getValue())));
         }
     }
-
+//String... columnFamily 是一个可变参数（使用 ... 语法表示），类型为 String，意味着可以传入零个或多个列族名称
     public boolean createTable(String nameSpace,String tableName, String... columnFamily) throws Exception {
         boolean b = tableIsExists(nameSpace+":"+tableName);
         if (b) {
