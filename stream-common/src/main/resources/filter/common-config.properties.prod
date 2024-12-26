@@ -22,5 +22,10 @@ kafka.start.log=dwd_start_log
 kafka.display.log=dwd_display_log
 kafka.action.log=dwd_action_log
 kafka.page.topic=dwd_page_log
+# kafka db
+dwd_interaction_favor_add=dwd_interaction_favor_add
+dwd_tool_coupon_get=dwd_tool_coupon_get
+dwd_tool_coupon_use=dwd_tool_coupon_use
+dwd_user_register=dwd_user_register
 # Hbase
 hbase.namespace=gmall

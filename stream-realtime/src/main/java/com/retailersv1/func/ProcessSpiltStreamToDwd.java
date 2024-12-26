@@ -45,40 +45,61 @@ public class ProcessSpiltStreamToDwd extends BroadcastProcessFunction<JSONObject
 //                type="insert";
 //            }
             configMap.put(tableProcessDwd.getSourceTable()+"-"+type,tableProcessDwd);
+           // {favor_info-insert=TableProcessDwd(sourceTable=favor_info, sourceType=insert, sinkTable=dwd_interaction_favor_add, sinkColumns=id,user_id,sku_id,create_time, op=null), coupon_use-update=TableProcessDwd(sourceTable=coupon_use, sourceType=update, sinkTable=dwd_tool_coupon_use, sinkColumns=id,coupon_id,user_id,order_id,using_time,used_time,coupon_status, op=null), user_info-insert=TableProcessDwd(sourceTable=user_info, sourceType=insert, sinkTable=dwd_user_register, sinkColumns=id,create_time, op=null), coupon_use-insert=TableProcessDwd(sourceTable=coupon_use, sourceType=insert, sinkTable=dwd_tool_coupon_get, sinkColumns=id,coupon_id,user_id,get_time,coupon_status, op=null)}
+            //{favor_info-insert=TableProcessDwd(sourceTable=favor_info, sourceType=insert, sinkTable=dwd_interaction_favor_add, sinkColumns=id,user_id,sku_id,create_time, op=null), coupon_use-update=TableProcessDwd(sourceTable=coupon_use, sourceType=update, sinkTable=dwd_tool_coupon_use, sinkColumns=id,coupon_id,user_id,order_id,using_time,used_time,coupon_status, op=null), coupon_use-insert=TableProcessDwd(sourceTable=coupon_use, sourceType=insert, sinkTable=dwd_tool_coupon_get, sinkColumns=id,coupon_id,user_id,get_time,coupon_status, op=null)}
         }
     }
 
     @Override
     public void processElement(JSONObject jsonObject, BroadcastProcessFunction<JSONObject, TableProcessDwd, Tuple2<JSONObject, TableProcessDwd>>.ReadOnlyContext readOnlyContext, Collector<Tuple2<JSONObject, TableProcessDwd>> collector) throws Exception {
         ReadOnlyBroadcastState<String, TableProcessDwd> broadcastState = readOnlyContext.getBroadcastState(mapStateDescriptor);
-        String table = jsonObject.getString("table");
+//        System.out.println(broadcastState+"xxxx");
+        //HeapBroadcastState{stateMetaInfo=RegisteredBroadcastBackendStateMetaInfo{name='mapStageDesc', keySerializer=org.apache.flink.api.common.typeutils.base.StringSerializer@6a2f6f80, valueSerializer=org.apache.flink.api.java.typeutils.runtime.PojoSerializer@47edfd50, assignmentMode=BROADCAST}, backingMap={favor_info-insert=TableProcessDwd(sourceTable=favor_info, sourceType=insert, sinkTable=dwd_interaction_favor_add, sinkColumns=id,user_id,sku_id,create_time, op=r), user_info-insert=TableProcessDwd(sourceTable=user_info, sourceType=insert, sinkTable=dwd_user_register, sinkColumns=id,create_time, op=r), coupon_use-update=TableProcessDwd(sourceTable=coupon_use, sourceType=update, sinkTable=dwd_tool_coupon_use, sinkColumns=id,coupon_id,user_id,order_id,using_time,used_time,coupon_status, op=r), coupon_use-insert=TableProcessDwd(sourceTable=coupon_use, sourceType=insert, sinkTable=dwd_tool_coupon_get, sinkColumns=id,coupon_id,user_id,get_time,coupon_status, op=r)}, internalMapCopySerializer=org.apache.flink.api.common.typeutils.base.MapSerializer@23ac7dd0}
+        //HeapBroadcastState{stateMetaInfo=RegisteredBroadcastBackendStateMetaInfo{name='mapStageDesc', keySerializer=org.apache.flink.api.common.typeutils.base.StringSerializer@6a2f6f80, valueSerializer=org.apache.flink.api.java.typeutils.runtime.PojoSerializer@47edfd50, assignmentMode=BROADCAST}, backingMap={favor_info-insert=TableProcessDwd(sourceTable=favor_info, sourceType=insert, sinkTable=dwd_interaction_favor_add, sinkColumns=id,user_id,sku_id,create_time, op=r), user_info-insert=TableProcessDwd(sourceTable=user_info, sourceType=insert, sinkTable=dwd_user_register, sinkColumns=id,create_time, op=r), coupon_use-update=TableProcessDwd(sourceTable=coupon_use, sourceType=update, sinkTable=dwd_tool_coupon_use, sinkColumns=id,coupon_id,user_id,order_id,using_time,used_time,coupon_status, op=r), coupon_use-insert=TableProcessDwd(sourceTable=coupon_use, sourceType=insert, sinkTable=dwd_tool_coupon_get, sinkColumns=id,coupon_id,user_id,get_time,coupon_status, op=r)}, internalMapCopySerializer=org.apache.flink.api.common.typeutils.base.MapSerializer@23ac7dd0}
+        String table = jsonObject.getJSONObject("source").getString("table");
     String op = jsonObject.getString("op");
+//        System.out.println(table+":"+op);
     //        if ("bootstrap-insert".equals(op)){
 //            op = "insert";
 //        }
+        if ("r".equals(op)){
+            op = "insert";
+        }
+        if ("u".equals(op)){
+            op = "update";
+        }
     String key = table+"-"+op;
         TableProcessDwd tableProcessDwd = broadcastState.get(key);
         if (tableProcessDwd==null){
             tableProcessDwd = configMap.get(key);
     }
         if (tableProcessDwd != null ){
-            System.out.println("-----------------------------");
-        collector.collect(Tuple2.of(jsonObject, tableProcessDwd));
+       //     TableProcessDwd(sourceTable=user_info, sourceType=insert, sinkTable=dwd_user_register, sinkColumns=id,create_time, op=r)
+                    collector.collect(Tuple2.of(jsonObject, tableProcessDwd));
     }
     }
 
     @Override
     public void processBroadcastElement(TableProcessDwd tableProcessDwd, BroadcastProcessFunction<JSONObject, TableProcessDwd, Tuple2<JSONObject, TableProcessDwd>>.Context context, Collector<Tuple2<JSONObject, TableProcessDwd>> collector) throws Exception {
+        // TableProcessDwd(sourceTable=coupon_use, sourceType=update, sinkTable=dwd_tool_coupon_use, sinkColumns=id,coupon_id,user_id,order_id,using_time,used_time,coupon_status, op=r)
         BroadcastState<String, TableProcessDwd> broadcastState = context.getBroadcastState(mapStateDescriptor);
         String op = tableProcessDwd.getOp();
         String sourceType = tableProcessDwd.getSourceType();
         String key = tableProcessDwd.getSourceTable()+"-"+sourceType;
+//     System.out.println(key+"---------------------");
+       // coupon_use-update
+       // user_info-insert
+
         if ("d".equals(op)){
             broadcastState.remove(key);
             configMap.remove(key);
 
         }else {
             broadcastState.put(key,tableProcessDwd);
+//            System.out.println(broadcastState+"broadcastState");
+           // HeapBroadcastState{stateMetaInfo=RegisteredBroadcastBackendStateMetaInfo{name='mapStageDesc', keySerializer=org.apache.flink.api.common.typeutils.base.StringSerializer@6a2f6f80, valueSerializer=org.apache.flink.api.java.typeutils.runtime.PojoSerializer@47edfd50, assignmentMode=BROADCAST}, backingMap={favor_info-insert=TableProcessDwd(sourceTable=favor_info, sourceType=insert, sinkTable=dwd_interaction_favor_add, sinkColumns=id,user_id,sku_id,create_time, op=r), coupon_use-update=TableProcessDwd(sourceTable=coupon_use, sourceType=update, sinkTable=dwd_tool_coupon_use, sinkColumns=id,coupon_id,user_id,order_id,using_time,used_time,coupon_status, op=r), coupon_use-insert=TableProcessDwd(sourceTable=coupon_use, sourceType=insert, sinkTable=dwd_tool_coupon_get, sinkColumns=id,coupon_id,user_id,get_time,coupon_status, op=r)}, internalMapCopySerializer=org.apache.flink.api.common.typeutils.base.MapSerializer@23ac7dd0}
+           // HeapBroadcastState{stateMetaInfo=RegisteredBroadcastBackendStateMetaInfo{name='mapStageDesc', keySerializer=org.apache.flink.api.common.typeutils.base.StringSerializer@6a2f6f80, valueSerializer=org.apache.flink.api.java.typeutils.runtime.PojoSerializer@47edfd50, assignmentMode=BROADCAST}, backingMap={favor_info-insert=TableProcessDwd(sourceTable=favor_info, sourceType=insert, sinkTable=dwd_interaction_favor_add, sinkColumns=id,user_id,sku_id,create_time, op=r), coupon_use-update=TableProcessDwd(sourceTable=coupon_use, sourceType=update, sinkTable=dwd_tool_coupon_use, sinkColumns=id,coupon_id,user_id,order_id,using_time,used_time,coupon_status, op=r), coupon_use-insert=TableProcessDwd(sourceTable=coupon_use, sourceType=insert, sinkTable=dwd_tool_coupon_get, sinkColumns=id,coupon_id,user_id,get_time,coupon_status, op=r)}, internalMapCopySerializer=org.apache.flink.api.common.typeutils.base.MapSerializer@23ac7dd0}broadcastState
+
         }
     }
     @Override
