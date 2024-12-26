@@ -48,7 +48,7 @@ public class DbusCdc2DimHbase {
 
         MySqlSource<String> mySQLCdcDimConfSource = CdcSourceUtils.getMySQLCdcSource(
                 ConfigUtils.getString("mysql.databases.conf"),
-                "realtime_v1_config.table_process_dim",
+                "gmall_conf.table_process_dim",
                 ConfigUtils.getString("mysql.user"),
                 ConfigUtils.getString("mysql.pwd"),
                 StartupOptions.initial()

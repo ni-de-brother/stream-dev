@@ -3,12 +3,12 @@ env=prod
 #Mysql
 mysql.host=cdh03
 mysql.port=3306
-mysql.database=gamll
+mysql.database=gmall
 mysql.databases.conf=gmall_conf
 mysql.user=root
 mysql.pwd=root
 mysql.url=jdbc:mysql://cdh03:3306?useSSL=false
-
+mysql.timezone=Asia/Shanghai
 # Zookeeper Server
 zookeeper.server.host.list=cdh03
 
@@ -16,5 +16,11 @@ zookeeper.server.host.list=cdh03
 kafka.bootstrap.servers=cdh01:9092,cdh02:9092,cdh03:9092
 REALTIME.KAFKA.LOG.TOPIC=topic_log
 kafka.topic.db=topic_db
+kafka.dirty.topic=dwd_dirtyTag_log
+kafka.err.log=dwd_err_log
+kafka.start.log=dwd_start_log
+kafka.display.log=dwd_display_log
+kafka.action.log=dwd_action_log
+kafka.page.topic=dwd_page_log
 # Hbase
 hbase.namespace=gmall
