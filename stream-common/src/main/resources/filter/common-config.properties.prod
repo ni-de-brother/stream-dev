@@ -15,6 +15,7 @@ zookeeper.server.host.list=cdh03
 # kafka cdh
 kafka.bootstrap.servers=cdh01:9092,cdh02:9092,cdh03:9092
 REALTIME.KAFKA.LOG.TOPIC=topic_log
+REALTIME.KAFKA.DB.TOPIC=topic_db
 kafka.topic.db=topic_db
 kafka.dirty.topic=dwd_dirtyTag_log
 kafka.err.log=dwd_err_log
@@ -27,5 +28,9 @@ dwd_interaction_favor_add=dwd_interaction_favor_add
 dwd_tool_coupon_get=dwd_tool_coupon_get
 dwd_tool_coupon_use=dwd_tool_coupon_use
 dwd_user_register=dwd_user_register
+
+kafka.topic.db=topic_db
 # Hbase
 hbase.namespace=gmall
+# dwd
+dwd.trade.cart.add=dwd_trade_cart_add

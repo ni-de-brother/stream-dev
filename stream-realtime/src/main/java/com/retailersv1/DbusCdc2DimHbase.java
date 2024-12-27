@@ -1,5 +1,4 @@
 package com.retailersv1;
-
 import com.alibaba.fastjson.JSONObject;
 import com.retailersv1.func.ProcessSpiltStreamToHBaseDim;
 import com.stream.common.utils.ConfigUtils;
@@ -16,10 +15,6 @@ import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-
-
-
-
 /**
  * @Package com.retailersv1.DbusCdc2DimHbase
  * @Author zhou.han
@@ -45,7 +40,6 @@ public class DbusCdc2DimHbase {
                 ConfigUtils.getString("mysql.pwd"),
                 StartupOptions.initial()
         );
-
         MySqlSource<String> mySQLCdcDimConfSource = CdcSourceUtils.getMySQLCdcSource(
                 ConfigUtils.getString("mysql.databases.conf"),
                 "gmall_conf.table_process_dim",
@@ -53,14 +47,13 @@ public class DbusCdc2DimHbase {
                 ConfigUtils.getString("mysql.pwd"),
                 StartupOptions.initial()
         );
-
         DataStreamSource<String> cdcDbMainStream = env.fromSource(mySQLDbMainCdcSource, WatermarkStrategy.noWatermarks(), "mysql_cdc_main_source");
-        DataStreamSource<String> cdcDbDimStream = env.fromSource(mySQLCdcDimConfSource, WatermarkStrategy.noWatermarks(), "mysql_cdc_dim_source");
-
+      DataStreamSource<String> cdcDbDimStream = env.fromSource(mySQLCdcDimConfSource, WatermarkStrategy.noWatermarks(), "mysql_cdc_dim_source");
         SingleOutputStreamOperator<JSONObject> cdcDbMainStreamMap = cdcDbMainStream.map(JSONObject::parseObject)
                 .uid("db_data_convert_json")
                 .name("db_data_convert_json")
                 .setParallelism(1);
+        System.out.println(cdcDbMainStreamMap);
 
         SingleOutputStreamOperator<JSONObject> cdcDbDimStreamMap = cdcDbDimStream.map(JSONObject::parseObject)
                 .uid("dim_data_convert_json")
