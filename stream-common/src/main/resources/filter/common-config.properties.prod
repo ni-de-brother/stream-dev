@@ -34,3 +34,7 @@ kafka.topic.db=topic_db
 hbase.namespace=gmall
 # dwd
 dwd.trade.cart.add=dwd_trade_cart_add
+dwd.trade.order.detail=dwd_trade_order_detail
+dwd_interaction_comment_info=dwd_interaction_comment_info
+# catalog
+hive.conf.dir=D://IDE/stream-dev/stream-realtime/src/main/resources/

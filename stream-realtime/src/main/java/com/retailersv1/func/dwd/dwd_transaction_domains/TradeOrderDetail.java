@@ -1,9 +1,14 @@
 package com.retailersv1.func.dwd.dwd_transaction_domains;
 
 import com.stream.common.utils.ConfigUtils;
+import com.stream.common.utils.KafkaUtils;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.types.Row;
+import org.json.JSONArray;
 
 /**
  * xqy
@@ -11,8 +16,9 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
  */
 //交易域下单事务事实表 trade_order_detail 1.订单详情表 2.订单表 3.活动表 4.优惠卷表
 public class TradeOrderDetail {
-//    private static final String kafka_botstrap_servers = ConfigUtils.getString("kafka.bootstrap.servers");
-//    private static final String dwd_trade_order_detail = ConfigUtils.getString("dwd.trade.order.detail");
+    private static final String kafka_botstrap_servers = ConfigUtils.getString("kafka.bootstrap.servers");
+    private static final String dwd_trade_order_detail = ConfigUtils.getString("dwd.trade.order.detail");
+
     public static void main(String[] args) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
@@ -52,7 +58,7 @@ public class TradeOrderDetail {
                 "where source['db']='gmall'\n" +
                 "and source['table']='order_detail'\n" +
                 "and `op` in ('bootstrap-insert','insert','r')");
-        tableEnv.createTemporaryView("order_delete_info",odTable);
+        tableEnv.createTemporaryView("order_delete_info", odTable);
 //        tableEnv.sqlQuery("select * from order_detail_info").execute().print();
         /**
          * 订单表
@@ -60,14 +66,14 @@ public class TradeOrderDetail {
         Table oiTable = tableEnv.sqlQuery("select \n" +
                 "  `after`['id'] id, \n" +
                 "  `after`['user_id'] user_id, \n" +
-                "  `after`['order_id'] user_id, \n" +
+                "  `after`['order_id'] order_id, \n" +
                 "  `after`['province_id'] province_id \n" +
                 "from topic_db\n" +
                 "where source['db']='gmall'\n" +
                 "and source['table']='order_info'\n" +
-                "and `op` in ('bootstrap-insert','insert','r')");
+                "and `op` in ('r','c')");
         tableEnv.createTemporaryView("order_info", oiTable);
-//        tableEnv.sqlQuery("select * from order_info limit 10").execute().print();
+       tableEnv.sqlQuery("select * from order_info limit 10").execute().print();
         /**
          * 活动表
          */
@@ -94,7 +100,7 @@ public class TradeOrderDetail {
                 "and source['table']='order_detail_coupon'\n" +
                 "and `op` in ('bootstrap-insert','insert','r')");
         tableEnv.createTemporaryView("order_detail_coupon", odcTable);
-   //tableEnv.sqlQuery("select * from order_detail_coupon limit 10").execute().print();
+//   tableEnv.sqlQuery("select * from order_detail_coupon limit 10").execute().print();
 
         /**
          * 关联表
@@ -107,7 +113,7 @@ public class TradeOrderDetail {
                 "  province_id,\n" +
                 "  activity_id,\n" +
                 "  activity_rule_id,\n" +
-                "  coupon_id,\n" +
+                "  odc.coupon_id,\n" +
                 "  sku_name,\n" +
                 "  order_price,\n" +
                 "  sku_num,\n" +
@@ -117,11 +123,18 @@ public class TradeOrderDetail {
                 "  split_coupon_amount,\n" +
                 "  ts_ms \n" +
                 "from order_delete_info od\n" +
-                " join order_info oi on od.order_id = oi.id\n" +
-                " left join order_detail_activity oda on oda.order_id=oi.id\n" +
-                " left join order_detail_coupon odc on odc.order_id=oi.id");
+                "  join order_info oi on od.order_id = oi.id\n" +
+                "  left join order_detail_activity oda on oda.order_id=oi.id\n" +
+                "  left join order_detail_coupon odc on odc.order_id=oi.id");
         tableEnv.createTemporaryView("xx",table6);
         tableEnv.sqlQuery("select * from xx limit 10 ").execute().print();
+//        DataStream<Row> rowDataStream = tableEnv.toDataStream(table6);
+//        SingleOutputStreamOperator<String> map = rowDataStream.map(String::valueOf);
+//        map.sinkTo(KafkaUtils.buildKafkaSink(
+//                        kafka_botstrap_servers,
+//                        dwd_trade_order_detail
+//                )).uid("dwd_trade_order_detail")
+//                .name("dwd_trade_order_detail");
         try {
             env.execute();
         } catch (Exception e) {

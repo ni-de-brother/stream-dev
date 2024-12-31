@@ -13,7 +13,7 @@ import org.apache.flink.types.Row;
  * xqy
  * 2024-12-27
  */
-
+//11.5交易域加购事务事实表 //cart_info加购表
 public class TradeCartAdd {
     private static final String kafka_botstrap_servers = ConfigUtils.getString("kafka.bootstrap.servers");
     private static final String dwd_trade_cart_add = ConfigUtils.getString("dwd.trade.cart.add");
